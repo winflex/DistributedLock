@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 提供简单时间服务的服务器
+ * 提供简单时间服务的服务器.
  * 
  * @author lixiaohui
  */
@@ -76,11 +76,9 @@ public class TimeServer {
 						}
 					} catch (IOException e) {
 						logger.error("{} exception: {}", key.channel(), e);
-						if (key != null) {
-							key.cancel();
-							if (key.channel() != null) {
-								key.channel().close();
-							}
+						key.cancel();
+						if (key.channel() != null) {
+							key.channel().close();
 						}
 					}
 				}

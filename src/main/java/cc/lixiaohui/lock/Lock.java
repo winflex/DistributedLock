@@ -2,7 +2,7 @@ package cc.lixiaohui.lock;
 
 import java.util.concurrent.TimeUnit;
 
-public interface Lock extends Releasable{
+public interface Lock extends Releasable {
 
 	/**
 	 * 阻塞性的获取锁, 不响应中断

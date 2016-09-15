@@ -23,11 +23,11 @@ public class LockInfo {
 	
 	private int count;
 	
-	private transient static final String LOCAL_MAC = PlatformUtils.MACAddress();
+	private static final transient String LOCAL_MAC = PlatformUtils.MACAddress();
 	
-	private transient static final int CURRENT_PID = PlatformUtils.JVMPid();
+	private static final transient int CURRENT_PID = PlatformUtils.JVMPid();
 	
-	private transient static final 	SimplePropertyPreFilter FILTER = new SimplePropertyPreFilter();
+	private static final transient SimplePropertyPreFilter FILTER = new SimplePropertyPreFilter();
 	
 	static {
 		FILTER.getExcludes().add("currentThread");
@@ -49,10 +49,6 @@ public class LockInfo {
 	
 	public boolean isCurrentThread() {
 		return mac.equals(LOCAL_MAC) && jvmPid == CURRENT_PID && Thread.currentThread().getId() == threadId;
-	}
-	
-	public static String toString(LockInfo lockInfo) {
-		return JSON.toJSONString(lockInfo, FILTER);
 	}
 	
 	public static LockInfo fromString(String lockInfo) {
@@ -116,6 +112,10 @@ public class LockInfo {
 	public LockInfo setCount(int count) {
 		this.count = count;
 		return this;
+	}
+	
+	public static String toString(LockInfo lockInfo) {
+		return JSON.toJSONString(lockInfo, FILTER);
 	}
 	
 	@Override

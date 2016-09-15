@@ -27,7 +27,7 @@ public class JedisBasedDistributedReadWriteLock implements ReadWriteLock {
 		return null;
 	}
 	
-	public static class ReadLock implements Lock{
+	public static class ReadLock implements Lock {
 
 		private Jedis jedis;
 		

@@ -31,6 +31,19 @@ public abstract class AbstractLock implements Lock {
 			// TODO ignore
 		}
 	}
+	
+	/**
+	 * 阻塞式获取锁的实现
+	 * 
+	 * @param useTimeout 
+	 * @param time
+	 * @param unit
+	 * @param interrupt 是否响应中断
+	 * @return
+	 * @throws InterruptedException
+	 */
+	protected abstract boolean lock(boolean useTimeout, long time, TimeUnit unit, boolean interrupt) throws InterruptedException;
+
 
 	public void lockInterruptibly() throws InterruptedException {
 		lock(false, 0, null, true);
@@ -50,25 +63,12 @@ public abstract class AbstractLock implements Lock {
 	}
 
 	public void unlock() {
-		// TODO 检查当前线程是否持有锁
-		
+		// TODO 
 		unlock0();
 	}
 
 	protected abstract void unlock0();
 	
-	//protected abstract boolean isHeldByCurrentThread();
+	protected abstract boolean isHeldByCurrentThread();
 	
-	/**
-	 * 阻塞式获取锁的实现
-	 * 
-	 * @param useTimeout 
-	 * @param time
-	 * @param unit
-	 * @param interrupt 是否响应中断
-	 * @return
-	 * @throws InterruptedException
-	 */
-	protected abstract boolean lock(boolean useTimeout, long time, TimeUnit unit, boolean interrupt) throws InterruptedException;
-
 }

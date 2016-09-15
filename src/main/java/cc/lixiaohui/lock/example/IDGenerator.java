@@ -11,7 +11,7 @@ import cc.lixiaohui.lock.Releasable;
  * @author lixiaohui
  *
  */
-public class IDGenerator implements Releasable{
+public class IDGenerator implements Releasable {
 
 	private static BigInteger id = BigInteger.valueOf(0);
 
@@ -27,11 +27,11 @@ public class IDGenerator implements Releasable{
 		if (lock.tryLock(3, TimeUnit.SECONDS)) {
 			try {
 				// TODO 这里获取到锁, 访问临界区资源
-				try {
+				/*try {
 					lock.tryLock(3, TimeUnit.SECONDS);
 				} finally {
 					lock.unlock();
-				}
+				}*/
 				
 				return getAndIncrement0();
 			} finally {

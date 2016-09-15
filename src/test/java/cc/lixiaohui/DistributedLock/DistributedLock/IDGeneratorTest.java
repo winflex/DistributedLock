@@ -2,102 +2,61 @@ package cc.lixiaohui.DistributedLock.DistributedLock;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.RedisBasedDistributedLockV_1_0;
-import cc.lixiaohui.lock.RedisBasedDistributedLockV_1_1;
-import cc.lixiaohui.lock.RedisBasedDistributedLockV_1_2;
+import cc.lixiaohui.lock.RedisBasedDistributedReentrantLock;
 import cc.lixiaohui.lock.example.IDGenerator;
 
 public class IDGeneratorTest {
 	
-	private static Set<String> generatedIds = new HashSet<String>();
+	static Set<String> generatedIds = new HashSet<String>();
 	
-	private static final String LOCK_KEY = "lock.lock";
-	private static final long LOCK_EXPIRE = 100000 * 1000;
+	static final String HOST = "localhost";
+	static final int PORT = 6379;
+	static final String LOCK_KEY = "lock.lock";
+	static final long LOCK_EXPIRE = 5 * 1000;
 	static final SocketAddress ADDR = new InetSocketAddress("localhost", 9999);
+	
+	static final long RUN_TIME = 20 * 1000;
+	
+	private static final Logger logger = LoggerFactory.getLogger(IDGeneratorTest.class);
 	
 	@Test
 	public void testReentrant() throws Exception {
+		// create (availableProcessors + 1) threads to consume id.
+		int count = Runtime.getRuntime().availableProcessors() + 1;
+		List<Thread> threads = new ArrayList<Thread>();
+		for (int i = 0; i < count; i++) {
+			Jedis jedis = new Jedis(HOST, PORT);
+			Lock lock = new RedisBasedDistributedReentrantLock(jedis, LOCK_KEY, LOCK_EXPIRE, ADDR);
+			IDGenerator generator = new IDGenerator(lock);
+			IDConsumeTask consumer = new IDConsumeTask(generator, "consumer" + i);
+			Thread thread = new Thread(consumer);
+			threads.add(thread);
+		}
 		
-		Jedis jedis1 = new Jedis("localhost", 6379);
-		Lock lock1 = new RedisBasedDistributedLockV_1_2(jedis1, LOCK_KEY, LOCK_EXPIRE, ADDR);
-		IDGenerator g1 = new IDGenerator(lock1);
-		IDConsumeTask consume1 = new IDConsumeTask(g1, "consume1");
+		// start all threads created.
+		for (Thread t : threads) {
+			t.start();
+		}
 		
-		Jedis jedis2 = new Jedis("localhost", 6379);
-		Lock lock2 = new RedisBasedDistributedLockV_1_2(jedis2, LOCK_KEY, LOCK_EXPIRE, ADDR);
-		IDGenerator g2 = new IDGenerator(lock2);
-		IDConsumeTask consume2 = new IDConsumeTask(g2, "consume2");
+		Thread.sleep(RUN_TIME); // run for a specified period of time
 		
-		Thread t1 = new Thread(consume1);
-		Thread t2 = new Thread(consume2);
-		t1.start();
-		t2.start();
+		IDConsumeTask.stopAll(); // tell all threads to stop
 		
-		Thread.sleep(20 * 1000); //让两个线程跑20秒
-		
-		IDConsumeTask.stopAll();
-		
-		t1.join();
-		t2.join();
-	}
-	@Test
-	public void test() throws Exception {
-		
-		Jedis jedis1 = new Jedis("localhost", 6379);
-		Lock lock1 = new RedisBasedDistributedLockV_1_0(jedis1, LOCK_KEY, LOCK_EXPIRE);
-		IDGenerator g1 = new IDGenerator(lock1);
-		IDConsumeTask consume1 = new IDConsumeTask(g1, "consume1");
-		
-		Jedis jedis2 = new Jedis("localhost", 6379);
-		Lock lock2 = new RedisBasedDistributedLockV_1_0(jedis2, LOCK_KEY, LOCK_EXPIRE);
-		IDGenerator g2 = new IDGenerator(lock2);
-		IDConsumeTask consume2 = new IDConsumeTask(g2, "consume2");
-		
-		Thread t1 = new Thread(consume1);
-		Thread t2 = new Thread(consume2);
-		t1.start();
-		t2.start();
-		
-		Thread.sleep(20 * 1000); //让两个线程跑20秒
-		
-		IDConsumeTask.stopAll();
-		
-		t1.join();
-		t2.join();
-	}
-	@Test
-	public void testTime() throws Exception {
-		
-		SocketAddress addr = new InetSocketAddress("localhost", 9999);
-		
-		Jedis jedis1 = new Jedis("localhost", 6379);
-		Lock lock1 = new RedisBasedDistributedLockV_1_1(jedis1, LOCK_KEY, LOCK_EXPIRE, addr);
-		IDGenerator g1 = new IDGenerator(lock1);
-		IDConsumeTask consume1 = new IDConsumeTask(g1, "consume1");
-		
-		Jedis jedis2 = new Jedis("localhost", 6379);
-		Lock lock2 = new RedisBasedDistributedLockV_1_1(jedis2, LOCK_KEY, LOCK_EXPIRE, addr);
-		IDGenerator g2 = new IDGenerator(lock2);
-		IDConsumeTask consume2 = new IDConsumeTask(g2, "consume2");
-		
-		Thread t1 = new Thread(consume1);
-		Thread t2 = new Thread(consume2);
-		t1.start();
-		//t2.start();
-		
-		Thread.sleep(20 * 1000); //让两个线程跑20秒
-		
-		IDConsumeTask.stopAll();
-		
-		t1.join();
-		t2.join();
+		// wait for all threads to finish.
+		for (Thread t : threads) {
+			t.join();
+		}
 	}
 	
 	static String time() {
@@ -122,7 +81,7 @@ public class IDGeneratorTest {
 		}
 		
 		public void run() {
-			System.out.println(time() + ": consume " + name + " start ");
+			logger.debug("{} : consumer {} start", time(), name);
 			while (!stop) {
 				String id = null;
 				try {
@@ -133,18 +92,18 @@ public class IDGeneratorTest {
 				}
 				if (id != null) {
 					if(generatedIds.contains(id)) {
-						System.out.println(time() + ": duplicate id generated, id = " + id);
+						logger.error("{} : duplicate id generated, id = {}", time(), id);
 						stop = true;
 						continue;
 					} 
 					
 					generatedIds.add(id);
-					System.out.println(String.format("----------------- %s add %s", Thread.currentThread().getName(), id));
+					logger.debug("{} add {}", Thread.currentThread().getName(), id);
 				}
 			}
 			// 释放资源
 			idGenerator.release();
-			System.out.println(time() + ": consume " + name + " done ");
+			logger.debug("{} : consumer {} done", time(), name);
 		}
 		
 	}

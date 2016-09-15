@@ -23,7 +23,7 @@ public class PlatformUtils {
 			byte[] macBytes = networkInterface.getHardwareAddress();
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < macBytes.length; i++) {
-				sb.append(String.format("%02X%s", macBytes[i], i < macBytes.length - 1? "-" : ""));
+				sb.append(String.format("%02X%s", macBytes[i], i < macBytes.length - 1 ? "-" : ""));
 			}
 			return sb.toString();
 		} catch (Exception e) {
