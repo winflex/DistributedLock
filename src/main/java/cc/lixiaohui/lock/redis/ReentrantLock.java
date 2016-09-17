@@ -1,4 +1,4 @@
-package cc.lixiaohui.lock;
+package cc.lixiaohui.lock.redis;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -8,7 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
+import cc.lixiaohui.lock.AbstractLock;
+import cc.lixiaohui.lock.Lock;
 import cc.lixiaohui.lock.time.nio.client.TimeClient;
+import cc.lixiaohui.lock.util.LockInfo;
 
 /**
  * 基于Redis的SETNX操作实现的分布式锁, 获取锁时最好用tryLock(long time, TimeUnit unit), 以免网路问题而导致线程一直阻塞.
@@ -36,7 +39,7 @@ import cc.lixiaohui.lock.time.nio.client.TimeClient;
  * 
  * <b>Usage Example:</b>
  * <pre>
- * 	{@link Lock} lock = new {@link RedisBasedDistributedReentrantLock}(jedis, "lockKey", lockExpires, timeServerAddr);
+ * 	{@link Lock} lock = new {@link ReentrantLock}(jedis, "lockKey", lockExpires, timeServerAddr);
  * 	if (lock.tryLock(3, TimeUnit.SECONDS)) {
  * 		try {
  * 			// do something
@@ -51,7 +54,7 @@ import cc.lixiaohui.lock.time.nio.client.TimeClient;
  * @date 2016年9月15日 下午2:52:38
  *
  */
-public class RedisBasedDistributedReentrantLock extends AbstractLock {
+public class ReentrantLock extends AbstractLock {
 
 	private Jedis jedis;
 
@@ -63,9 +66,9 @@ public class RedisBasedDistributedReentrantLock extends AbstractLock {
 	// 锁的有效时长(毫秒)
 	protected long lockExpires;
 
-	private static final Logger logger = LoggerFactory.getLogger(RedisBasedDistributedReentrantLock.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReentrantLock.class);
 
-	public RedisBasedDistributedReentrantLock(Jedis jedis, String lockKey, long lockExpires, SocketAddress timeServerAddr) throws IOException {
+	public ReentrantLock(Jedis jedis, String lockKey, long lockExpires, SocketAddress timeServerAddr) throws IOException {
 		this.jedis = jedis;
 		this.lockKey = lockKey;
 		this.lockExpires = lockExpires;

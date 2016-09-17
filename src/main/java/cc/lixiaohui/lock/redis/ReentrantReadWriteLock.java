@@ -1,28 +1,51 @@
-package cc.lixiaohui.lock;
+package cc.lixiaohui.lock.redis;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import redis.clients.jedis.Jedis;
+import cc.lixiaohui.lock.Lock;
+import cc.lixiaohui.lock.ReadWriteLock;
 import cc.lixiaohui.lock.time.nio.client.TimeClient;
 
+/**
+ * 基于Redis的分布式读写可重入锁(读读不互斥, 读写互斥, 写写互斥)
+ * <pre>
+ * 锁设计: 读锁和写锁的锁信息分开存储
+ * read lock: {
+ * 	expires:
+ * }
+ * </pre>
+ * @author lixiaohui
+ * @date 2016年9月17日 上午11:52:06
+ *
+ */
+public class ReentrantReadWriteLock implements ReadWriteLock {
 
-public class JedisBasedDistributedReadWriteLock implements ReadWriteLock {
-
-	private Lock readLock;
+	private ReadLock readLock;
 	
-	private Lock writeLock;
+	private WriteLock writeLock;
 	
-	public JedisBasedDistributedReadWriteLock(Jedis jedis, String readLockKey, String writeLockKey
+	public ReentrantReadWriteLock(Jedis jedis, String readLockKey, String writeLockKey
 			, long readLockExpires, long writeLockExpires, SocketAddress timeServerAddr) throws IOException {
 		
 	}
 	
+	/**
+     * Returns the lock used for reading.
+     *
+     * @return the lock used for reading
+     */
 	public Lock readLock() {
 		return null;
 	}
 
+	/**
+     * Returns the lock used for writing.
+     *
+     * @return the lock used for writing
+     */
 	public Lock writeLock() {
 		return null;
 	}
