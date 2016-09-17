@@ -2,7 +2,7 @@ package cc.lixiaohui.DistributedLock.DistributedLock;
 
 import org.junit.Test;
 
-import cc.lixiaohui.lock.LockInfo;
+import cc.lixiaohui.lock.util.LockInfo;
 
 public class LockInfoTest {
 	

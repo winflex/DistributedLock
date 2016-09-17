@@ -1,7 +1,6 @@
 package cc.lixiaohui.lock.util;
 
 import redis.clients.jedis.Jedis;
-import cc.lixiaohui.lock.LockInfo;
 
 public class LockUtils {
 	

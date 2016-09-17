@@ -1,11 +1,10 @@
-package cc.lixiaohui.lock;
-
-import cc.lixiaohui.lock.util.PlatformUtils;
+package cc.lixiaohui.lock.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 
 /**
+ * 锁信息
  * 
  * @author lixiaohui
  * @date 2016年9月14日 上午10:22:39

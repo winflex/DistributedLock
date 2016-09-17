@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.RedisBasedDistributedReentrantLock;
 import cc.lixiaohui.lock.example.IDGenerator;
+import cc.lixiaohui.lock.redis.ReentrantLock;
 
 public class IDGeneratorTest {
 	
@@ -37,7 +37,7 @@ public class IDGeneratorTest {
 		List<Thread> threads = new ArrayList<Thread>();
 		for (int i = 0; i < count; i++) {
 			Jedis jedis = new Jedis(HOST, PORT);
-			Lock lock = new RedisBasedDistributedReentrantLock(jedis, LOCK_KEY, LOCK_EXPIRE, ADDR);
+			Lock lock = new ReentrantLock(jedis, LOCK_KEY, LOCK_EXPIRE, ADDR);
 			IDGenerator generator = new IDGenerator(lock);
 			IDConsumeTask consumer = new IDConsumeTask(generator, "consumer" + i);
 			Thread thread = new Thread(consumer);
