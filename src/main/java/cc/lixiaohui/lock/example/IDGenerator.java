@@ -8,7 +8,9 @@ import cc.lixiaohui.lock.Releasable;
 
 /**
  * 模拟分布式环境中的ID生成 
+ * 
  * @author lixiaohui
+ * @date 2016年9月19日 下午9:18:40
  *
  */
 public class IDGenerator implements Releasable {

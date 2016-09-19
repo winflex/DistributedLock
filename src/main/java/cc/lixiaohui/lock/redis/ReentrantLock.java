@@ -105,6 +105,7 @@ public class ReentrantLock extends AbstractLock {
 			if (jedis.setnx(lockKey, newLockInfoJson) == 1) { // 条件能成立的唯一情况就是redis中lockKey还未关联value
 				// TODO 成功获取到锁, 设置相关标识
 				logger.debug("{} get lock(new), lockInfo: {}", Thread.currentThread().getName(), newLockInfoJson);
+				locked = true;
 				return true;
 			}
 
@@ -123,6 +124,7 @@ public class ReentrantLock extends AbstractLock {
 				if (oldLockInfo != null && isTimeExpired(oldLockInfo.getExpires())) {
 					// TODO 成功获取到锁, 设置相关标识
 					logger.debug("{} get lock(new), lockInfo: {}", Thread.currentThread().getName(), newLockInfoJson);
+					locked = true;
 					return true;
 				}
 			} else {
@@ -133,10 +135,12 @@ public class ReentrantLock extends AbstractLock {
 					currLockInfo.incCount();
 					jedis.set(lockKey, currLockInfo.toString());
 					logger.debug("{} get lock(inc), lockInfo: {}", Thread.currentThread().getName(), currLockInfo);
+					locked = true;
 					return true;
 				}
 			}
 		}
+		locked = false;
 		return false;
 	}
 
@@ -145,6 +149,7 @@ public class ReentrantLock extends AbstractLock {
 		String newLockInfo = LockInfo.newForCurrThread(lockExpireTime).toString();
 
 		if (jedis.setnx(lockKey, newLockInfo) == 1) {
+			locked = true;
 			return true;
 		}
 
@@ -152,8 +157,10 @@ public class ReentrantLock extends AbstractLock {
 		if (currLockInfoJson == null) {
 			// 再一次尝试获取
 			if (jedis.setnx(lockKey, newLockInfo) == 1) {
+				locked = true;
 				return true;
 			} else {
+				locked = false;
 				return false;
 			}
 		}
@@ -163,6 +170,7 @@ public class ReentrantLock extends AbstractLock {
 		if (isTimeExpired(currLockInfo.getExpires())) {
 			LockInfo oldLockInfo = LockInfo.fromString(jedis.getSet(lockKey, newLockInfo));
 			if (oldLockInfo != null && isTimeExpired(oldLockInfo.getExpires())) {
+				locked = true;
 				return true;
 			}
 		} else {
@@ -170,9 +178,11 @@ public class ReentrantLock extends AbstractLock {
 				currLockInfo.setExpires(serverTimeMillis() + lockExpires + 1); 
 				currLockInfo.incCount();
 				jedis.set(lockKey, currLockInfo.toString());
+				locked = true;
 				return true;
 			}
 		}
+		locked = false;
 		return false;
 	}
 
@@ -186,6 +196,9 @@ public class ReentrantLock extends AbstractLock {
 		// walkthrough
 		// 1. lockKey未关联value, return false
 		// 2. 若 lock 已过期, return false, 否则 return true
+		if (!locked) { // 本地locked为false, 肯定没加锁
+			return false;
+		}
 		String json = jedis.get(lockKey);
 		if (json == null) {
 			return false;
