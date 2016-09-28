@@ -15,8 +15,6 @@ import com.alibaba.fastjson.JSON;
  * if writeInfo is null, then readInfos must be null or its size must be 0. if condition mentioned 
  * above are not set up, then we have reason to think that this lock is useless.
  * 
- * 
- * 
  * @author lixiaohui
  * @date 2016年9月17日 下午12:09:28
  * 

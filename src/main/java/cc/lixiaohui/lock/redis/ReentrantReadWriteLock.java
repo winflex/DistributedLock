@@ -88,7 +88,7 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 		
 		private final String lockKey;
 		
-		private long readLockExpires;
+		private long lockExpires;
 		
 		private ReentrantReadWriteLock readWriteLock;
 		
@@ -96,7 +96,7 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 			this.readWriteLock = readWriteLock;
 			this.jedis = jedis;
 			this.lockKey = lockKey;
-			this.readLockExpires = readLockExpires;
+			this.lockExpires = readLockExpires;
 		}
 
 		/* 
@@ -108,7 +108,7 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 			 * 1. 判断写锁是否被持有, 若被持有, return false
 			 * 2. 
 			 */
-			long lockExpireTime = readWriteLock.serverTimeMillis() + readLockExpires + 1;
+			long lockExpireTime = readWriteLock.serverTimeMillis() + lockExpires + 1;
 			//String stringOflockExpireTime = String.valueOf(lockExpireTime);
 			
 			String newReadInfoJson = ReadWriteLockInfo.newReadForCurrThread(lockExpireTime).toString();

@@ -9,7 +9,7 @@ public class ObjectUtils {
 	
 	public static void requireNonNull(Object... obj) {
 		if (obj.length % 2 != 0) {
-			throw new IllegalArgumentException("obj's length mod 2 must be 0.");
+			throw new IllegalArgumentException("arguments's length mod 2 must be 0.");
 		}
 		
 		for (int i = 0; i < obj.length; i += 2) {
