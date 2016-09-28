@@ -19,4 +19,11 @@ public class ObjectUtils {
 		}
 	}
 	
+	public static <T>  T requiredNonNull(T object) {
+		if (object == null) {
+			throw new NullPointerException();
+		}
+		return object;
+	}
+	
 }
