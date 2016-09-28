@@ -1,2 +1,2 @@
 # DistributedLock
-Distributed Lock programmed in Java
+A Java distributed lock library that uses Redis as the central sync point
