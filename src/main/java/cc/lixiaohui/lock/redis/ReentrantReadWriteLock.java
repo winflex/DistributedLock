@@ -8,7 +8,6 @@ import redis.clients.jedis.Jedis;
 import cc.lixiaohui.lock.AbstractLock;
 import cc.lixiaohui.lock.Lock;
 import cc.lixiaohui.lock.ReadWriteLock;
-import cc.lixiaohui.lock.time.nio.client.TimeClient;
 import cc.lixiaohui.lock.util.ReadWriteLockInfo;
 
 /**
@@ -30,13 +29,10 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 	
 	private ReentrantReadWriteLock.WriteLock writeLock;
 	
-	private TimeClient timeClient;
-	
 	private Jedis jedis;
 	
 	public ReentrantReadWriteLock(Jedis jedis, String lockKey, long readLockExpires, long writeLockExpires, SocketAddress timeServerAddr) throws IOException {
 		this.jedis = jedis;
-		timeClient = new TimeClient(timeServerAddr);
 		readLock = new ReadLock(this, jedis, lockKey, readLockExpires);
 		writeLock = new WriteLock(jedis, lockKey, writeLockExpires);
 	}
@@ -75,7 +71,7 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 	}
 
 	private long serverTimeMillis() {
-		return timeClient.currentTimeMillis();
+		return Long.parseLong(jedis.time().get(0));
 	}
 
 	private long localTimeMillis() {

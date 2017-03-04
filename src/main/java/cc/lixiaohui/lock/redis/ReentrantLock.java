@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import cc.lixiaohui.lock.AbstractLock;
 import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.time.nio.client.TimeClient;
 import cc.lixiaohui.lock.util.LockInfo;
 
 /**
@@ -58,7 +57,7 @@ public class ReentrantLock extends AbstractLock {
 
 	private Jedis jedis;
 
-	private TimeClient timeClient;
+	//private TimeClient timeClient;
 
 	// 锁的名字
 	protected String lockKey;
@@ -72,7 +71,7 @@ public class ReentrantLock extends AbstractLock {
 		this.jedis = jedis;
 		this.lockKey = lockKey;
 		this.lockExpires = lockExpires;
-		timeClient = new TimeClient(timeServerAddr);
+		//timeClient = new TimeClient(timeServerAddr);
 	}
 
 	// 阻塞式获取锁的实现
@@ -240,7 +239,7 @@ public class ReentrantLock extends AbstractLock {
 
 	public void release() {
 		jedis.close();
-		timeClient.close();
+		//timeClient.close();
 	}
 	
 	public boolean isHeldByCurrentThread() {
@@ -269,7 +268,7 @@ public class ReentrantLock extends AbstractLock {
 	}
 
 	private long serverTimeMillis() {
-		return timeClient.currentTimeMillis();
+		return Long.parseLong(jedis.time().get(0));
 	}
 
 	private long localTimeMillis() {
