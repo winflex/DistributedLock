@@ -1,4 +1,4 @@
-package cc.lixiaohui.lock;
+package io.lock;
 
 /**
  * 代表持有资源的对象, 例如

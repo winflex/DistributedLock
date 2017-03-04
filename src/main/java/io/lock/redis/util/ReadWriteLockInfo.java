@@ -1,7 +1,9 @@
 /**
  * 
  */
-package cc.lixiaohui.lock.util;
+package io.lock.redis.util;
+
+import io.lock.util.ObjectUtils;
 
 import java.util.HashSet;
 import java.util.Set;

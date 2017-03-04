@@ -1,4 +1,4 @@
-package cc.lixiaohui.lock.util;
+package io.lock.util;
 
 /**
  * @author lixiaohui

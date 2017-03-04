@@ -1,5 +1,9 @@
 package cc.lixiaohui.DistributedLock.DistributedLock;
 
+import io.lock.Lock;
+import io.lock.example.IDGenerator;
+import io.lock.redis.RedisReentrantLock;
+
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -12,9 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
-import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.example.IDGenerator;
-import cc.lixiaohui.lock.redis.ReentrantLock;
 
 public class IDGeneratorTest {
 	
@@ -37,7 +38,7 @@ public class IDGeneratorTest {
 		List<Thread> threads = new ArrayList<Thread>();
 		for (int i = 0; i < count; i++) {
 			Jedis jedis = new Jedis(HOST, PORT);
-			Lock lock = new ReentrantLock(jedis, LOCK_KEY, LOCK_EXPIRE, ADDR);
+			Lock lock = new RedisReentrantLock(jedis, LOCK_KEY, LOCK_EXPIRE);
 			IDGenerator generator = new IDGenerator(lock);
 			IDConsumeTask consumer = new IDConsumeTask(generator, "consumer" + i);
 			Thread thread = new Thread(consumer);

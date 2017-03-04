@@ -1,4 +1,4 @@
-package cc.lixiaohui.lock.util;
+package io.lock.util;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;

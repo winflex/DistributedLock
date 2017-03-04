@@ -1,8 +1,8 @@
 package cc.lixiaohui.DistributedLock.DistributedLock;
 
-import org.junit.Test;
+import io.lock.util.PlatformUtils;
 
-import cc.lixiaohui.lock.util.PlatformUtils;
+import org.junit.Test;
 
 public class PlatformTest {
 	

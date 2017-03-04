@@ -1,4 +1,4 @@
-package cc.lixiaohui.lock;
+package io.lock;
 
 import java.util.concurrent.TimeUnit;
 

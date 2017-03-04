@@ -1,10 +1,10 @@
-package cc.lixiaohui.lock.example;
+package io.lock.example;
+
+import io.lock.Lock;
+import io.lock.Releasable;
 
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
-
-import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.Releasable;
 
 /**
  * 模拟分布式环境中的ID生成 

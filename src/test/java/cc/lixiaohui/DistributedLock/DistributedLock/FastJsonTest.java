@@ -3,13 +3,13 @@
  */
 package cc.lixiaohui.DistributedLock.DistributedLock;
 
+import io.lock.redis.util.LockInfo;
+import io.lock.redis.util.ReadWriteLockInfo;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
-
-import cc.lixiaohui.lock.util.LockInfo;
-import cc.lixiaohui.lock.util.ReadWriteLockInfo;
 
 import com.alibaba.fastjson.JSON;
 

@@ -1,16 +1,15 @@
-package cc.lixiaohui.lock.redis;
+package io.lock.redis;
 
-import java.io.IOException;
-import java.net.SocketAddress;
+import io.lock.AbstractLock;
+import io.lock.Lock;
+import io.lock.redis.util.LockInfo;
+
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
-import cc.lixiaohui.lock.AbstractLock;
-import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.util.LockInfo;
 
 /**
  * 基于Redis的SETNX操作实现的分布式锁, 获取锁时最好用tryLock(long time, TimeUnit unit), 以免网路问题而导致线程一直阻塞.
@@ -38,7 +37,7 @@ import cc.lixiaohui.lock.util.LockInfo;
  * 
  * <b>Usage Example:</b>
  * <pre>
- * 	{@link Lock} lock = new {@link ReentrantLock}(jedis, "lockKey", lockExpires, timeServerAddr);
+ * 	{@link Lock} lock = new {@link RedisReentrantLock}(jedis, "lockKey", lockExpires, timeServerAddr);
  * 	if (lock.tryLock(3, TimeUnit.SECONDS)) {
  * 		try {
  * 			// do something
@@ -53,25 +52,29 @@ import cc.lixiaohui.lock.util.LockInfo;
  * @date 2016年9月15日 下午2:52:38
  *
  */
-public class ReentrantLock extends AbstractLock {
+public class RedisReentrantLock extends AbstractLock {
+	
+	private static final String DEFAULT_LOCK_KEY = "lock.lock";
+	private static final long DEFAULT_LOCK_EXPIRES = 3000L;
+	
 
 	private Jedis jedis;
 
-	//private TimeClient timeClient;
-
-	// 锁的名字
 	protected String lockKey;
 
 	// 锁的有效时长(毫秒)
 	protected long lockExpires;
 
-	private static final Logger logger = LoggerFactory.getLogger(ReentrantLock.class);
+	private static final Logger logger = LoggerFactory.getLogger(RedisReentrantLock.class);
 
-	public ReentrantLock(Jedis jedis, String lockKey, long lockExpires, SocketAddress timeServerAddr) throws IOException {
+	public RedisReentrantLock(Jedis jedis) {
+		this(jedis, DEFAULT_LOCK_KEY, DEFAULT_LOCK_EXPIRES);
+	}
+	
+	public RedisReentrantLock(Jedis jedis, String lockKey, long lockExpires) {
 		this.jedis = jedis;
 		this.lockKey = lockKey;
 		this.lockExpires = lockExpires;
-		//timeClient = new TimeClient(timeServerAddr);
 	}
 
 	// 阻塞式获取锁的实现
@@ -102,7 +105,7 @@ public class ReentrantLock extends AbstractLock {
 			long lockExpireTime = serverTimeMillis() + lockExpires + 1;// 锁超时时间
 			String newLockInfoJson = LockInfo.newForCurrThread(lockExpireTime).toString();
 			if (jedis.setnx(lockKey, newLockInfoJson) == 1) { // 条件能成立的唯一情况就是redis中lockKey还未关联value
-				// TODO 成功获取到锁, 设置相关标识
+				// 成功获取到锁, 设置相关标识
 				logger.debug("{} get lock(new), lockInfo: {}", Thread.currentThread().getName(), newLockInfoJson);
 				locked = true;
 				return true;
@@ -121,7 +124,7 @@ public class ReentrantLock extends AbstractLock {
 				// 锁超时了
 				LockInfo oldLockInfo = LockInfo.fromString(jedis.getSet(lockKey, newLockInfoJson));
 				if (oldLockInfo != null && isTimeExpired(oldLockInfo.getExpires())) {
-					// TODO 成功获取到锁, 设置相关标识
+					// 成功获取到锁, 设置相关标识
 					logger.debug("{} get lock(new), lockInfo: {}", Thread.currentThread().getName(), newLockInfoJson);
 					locked = true;
 					return true;
@@ -129,7 +132,7 @@ public class ReentrantLock extends AbstractLock {
 			} else {
 				// 锁未超时, 不会有竞争情况
 				if (isHeldByCurrentThread(currLockInfo)) { // 当前线程持有
-					// TODO 成功获取到锁, 设置相关标识
+					// 成功获取到锁, 设置相关标识
 					currLockInfo.setExpires(serverTimeMillis() + lockExpires + 1); // 设置新的锁超时时间
 					currLockInfo.incCount();
 					jedis.set(lockKey, currLockInfo.toString());
@@ -239,7 +242,6 @@ public class ReentrantLock extends AbstractLock {
 
 	public void release() {
 		jedis.close();
-		//timeClient.close();
 	}
 	
 	public boolean isHeldByCurrentThread() {
@@ -263,7 +265,6 @@ public class ReentrantLock extends AbstractLock {
 	}
 
 	private boolean isTimeout(long start, long timeout) {
-		// 这里拿本地的时间来比较
 		return start + timeout < System.currentTimeMillis();
 	}
 

@@ -1,14 +1,15 @@
-package cc.lixiaohui.lock.redis;
+package io.lock.redis;
+
+import io.lock.AbstractLock;
+import io.lock.Lock;
+import io.lock.ReadWriteLock;
+import io.lock.redis.util.ReadWriteLockInfo;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import redis.clients.jedis.Jedis;
-import cc.lixiaohui.lock.AbstractLock;
-import cc.lixiaohui.lock.Lock;
-import cc.lixiaohui.lock.ReadWriteLock;
-import cc.lixiaohui.lock.util.ReadWriteLockInfo;
 
 /**
  * 基于Redis的分布式读写可重入锁(读读不互斥, 读写互斥, 写写互斥)
@@ -23,15 +24,15 @@ import cc.lixiaohui.lock.util.ReadWriteLockInfo;
  * @date 2016年9月17日 上午11:52:06
  *
  */
-public class ReentrantReadWriteLock implements ReadWriteLock {
+public class RedisReentrantReadWriteLock implements ReadWriteLock {
 
-	private ReentrantReadWriteLock.ReadLock readLock;
+	private RedisReentrantReadWriteLock.ReadLock readLock;
 	
-	private ReentrantReadWriteLock.WriteLock writeLock;
+	private RedisReentrantReadWriteLock.WriteLock writeLock;
 	
 	private Jedis jedis;
 	
-	public ReentrantReadWriteLock(Jedis jedis, String lockKey, long readLockExpires, long writeLockExpires, SocketAddress timeServerAddr) throws IOException {
+	public RedisReentrantReadWriteLock(Jedis jedis, String lockKey, long readLockExpires, long writeLockExpires, SocketAddress timeServerAddr) throws IOException {
 		this.jedis = jedis;
 		readLock = new ReadLock(this, jedis, lockKey, readLockExpires);
 		writeLock = new WriteLock(jedis, lockKey, writeLockExpires);
@@ -86,9 +87,9 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 		
 		private long lockExpires;
 		
-		private ReentrantReadWriteLock readWriteLock;
+		private RedisReentrantReadWriteLock readWriteLock;
 		
-		public ReadLock(ReentrantReadWriteLock readWriteLock, Jedis jedis, String lockKey, long readLockExpires) {
+		public ReadLock(RedisReentrantReadWriteLock readWriteLock, Jedis jedis, String lockKey, long readLockExpires) {
 			this.readWriteLock = readWriteLock;
 			this.jedis = jedis;
 			this.lockKey = lockKey;

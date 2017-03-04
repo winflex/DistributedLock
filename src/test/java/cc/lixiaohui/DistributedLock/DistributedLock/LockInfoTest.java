@@ -1,8 +1,8 @@
 package cc.lixiaohui.DistributedLock.DistributedLock;
 
-import org.junit.Test;
+import io.lock.redis.util.LockInfo;
 
-import cc.lixiaohui.lock.util.LockInfo;
+import org.junit.Test;
 
 public class LockInfoTest {
 	

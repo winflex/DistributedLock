@@ -1,8 +1,8 @@
 package cc.lixiaohui.DistributedLock.DistributedLock;
 
+import io.lock.redis.RedisReentrantLock;
+
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import redis.clients.jedis.Jedis;
-import cc.lixiaohui.lock.redis.ReentrantLock;
 
 /**
  * @author lixiaohui
@@ -19,12 +18,6 @@ import cc.lixiaohui.lock.redis.ReentrantLock;
  * 
  */
 public class ReentrantTest {
-	
-	final int EXPIRES = 10 * 1000;
-	
-	final String LOCK_KEY = "lock.lock";
-	
-	final SocketAddress TIME_SERVER_ADDR = new InetSocketAddress("localhost", 9999);
 	
 	@Test
 	public void test() throws Exception {
@@ -49,7 +42,7 @@ public class ReentrantTest {
 		List<Thread> threads = new ArrayList<Thread>();
 		for (int i = 0; i < count; i++) {
 			Jedis jedis = new Jedis("localhost", 6379);
-			ReentrantLock lock = new ReentrantLock(jedis, LOCK_KEY, EXPIRES, TIME_SERVER_ADDR);
+			RedisReentrantLock lock = new RedisReentrantLock(jedis);
 			Task task = new Task(lock);
 			Thread t = new Thread(task);
 			threads.add(t);
@@ -59,7 +52,7 @@ public class ReentrantTest {
 	
 	private static class Task implements Runnable {
 		
-		private ReentrantLock lock;
+		private RedisReentrantLock lock;
 		
 		private final int MAX_ENTRANT = 5;
 		
@@ -67,7 +60,7 @@ public class ReentrantTest {
 		
 		private static boolean alive = true;
 		
-		Task(ReentrantLock lock) {
+		Task(RedisReentrantLock lock) {
 			this.lock = lock;
 		}
 		

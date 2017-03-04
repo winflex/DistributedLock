@@ -1,4 +1,6 @@
-package cc.lixiaohui.lock.util;
+package io.lock.redis.util;
+
+import io.lock.util.PlatformUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
